@@ -192,14 +192,14 @@ void eval(char *cmdline)
                 exit(0);
             }
         }
-
         //后台进程执行
         if (bg)
         {
             addjob(jobs, pid, BG, cmdline); //后台进程加入jobs
             printf("[%d] (%d) %s", pid2jid(pid), pid, cmdline);
+            // how to delete  TODO
+            // deletejob(jobs, pid);
         }
-
         else
         {
             addjob(jobs, pid, FG, cmdline);
@@ -207,6 +207,8 @@ void eval(char *cmdline)
             int status;
             if (waitpid(pid, &status, 0) < 0)
                 unix_error("waitfg:waitpid error");
+            else
+                deletejob(jobs, pid);
         }
     }
     return;
@@ -375,7 +377,7 @@ void sigtstp_handler(int sig)
  * Helper routines that manipulate the job list
  **********************************************/
 
-/* clearjob - Clear the entries in a job struct 删除一个job */
+/* clearjob - Clear the entries in a job struct 删除一个job 参数为一个job指针 */
 void clearjob(struct job_t *job)
 {
     job->pid = 0;
