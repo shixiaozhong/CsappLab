@@ -346,15 +346,13 @@ void sigchld_handler(int sig)
  */
 void sigint_handler(int sig)
 {
-    for (int i = 1; i < nextjid; i++)
+    pid_t pid = fgpid(jobs); // 在jobs中查找当前前台进程， 返回pid
+    struct job_t *job = getjobpid(jobs, pid);
+    // 干掉前台进程
+    if (pid && job->state == FG)
     {
-        pid_t pid = fgpid(jobs); // 在jobs中查找当前前台进程， 返回pid
-        // 干掉前台进程
-        if (pid)
-        {
-            printf("Job [%d] (%d) terminated by signal 2\n", pid2jid(pid), pid);
-            clearjob(getjobpid(jobs, pid)); // 从任务列表中删除
-        }
+        printf("Job [%d] (%d) terminated by signal 2\n", pid2jid(pid), pid);
+        clearjob(job); // 从任务列表中删除
     }
     return;
 }
@@ -363,9 +361,19 @@ void sigint_handler(int sig)
  * sigtstp_handler - The kernel sends a SIGTSTP to the shell whenever
  *     the user types ctrl-z at the keyboard. Catch it and suspend the
  *     foreground job by sending it a SIGTSTP.
+    捕捉一个20号信号，发送给前台进程，停止进程
  */
 void sigtstp_handler(int sig)
 {
+    // pid_t pid = fgpid(jobs); // 在jobs中查找当前前台进程， 返回pid
+    // struct job_t *job = getjobpid(jobs, pid);
+    // // 干掉前台进程
+    // if (pid && job->state == FG)
+    // {
+    //     printf("Job [%d] (%d) terminated by signal 2\n", pid2jid(pid), pid);
+    //     clearjob(job); // 从任务列表中删除
+    // }
+
     return;
 }
 
